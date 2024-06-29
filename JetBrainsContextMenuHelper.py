@@ -1,5 +1,5 @@
 """
-This is a helper script to add options like "使用 Idea 打开 (Open with Idea)" intoRight-click context menu on Windows by adding Windows registry entries.
+This is a helper script to add options like "使用 Idea 打开 (Open with Idea)" into right-click context menu on Windows by adding Windows registry entries.
 If you install JetBrains' applications via JetBrains Toolbox, there would be no option for you to generate the above context menu entry automatically. An solution is to add correspoding registry entries.
 However, Toolbox save applications in paths which contains version numbers, and when updating application the path changes, making it tiring to manually keep the registry entries, so here comes this script.
 
@@ -41,14 +41,14 @@ HKCR_DRIVER = KEY_STORE(r'Driver\shell', '%1')
 
 # config start here
 # base path for applications, application paths that are not absolute will be concat to this
-base_path = r'C:\D\I\JetBrains\apps'
+base_path = r'C:\D\R\JetBrains\Toolbox'
 applications: List[App] = [
-    App('Android Studio', r'AndroidStudio\ch-0\*\bin\studio64.exe'),
-    App('CLion', r'CLion\ch-0\*\bin\clion64.exe'),
-    App('Idea', r'IDEA-U\ch-0\*\bin\idea64.exe'),
-    App('PhpStorm', r'PhpStorm\ch-0\*\bin\phpstorm64.exe'),
-    App('PyCharm', r'PyCharm-P\ch-0\*\bin\pycharm64.exe'),
-    App('WebStorm', r'WebStorm\ch-0\*\bin\webstorm64.exe'),
+    App('Android Studio', r'Android Studio\bin\studio64.exe'),
+    App('CLion', r'CLion\bin\clion64.exe'),
+    App('GoLand', r'GoLand\bin\goland64.exe'),
+    App('Idea', r'IntelliJ IDEA Ultimate\bin\idea64.exe'),
+    App('PyCharm', r'PyCharm Professional\bin\pycharm64.exe'),
+    App('RustRover', r'RustRover\bin\rustrover64.exe'),
 ]  # list of applications to be added to context menu, contains name and path, where "*" implies version number
 text_wrapper = '使用 {} 打开'  # wrap displayed text in context menu
 context_menu_locations = [
@@ -58,7 +58,7 @@ context_menu_locations = [
     # HKCR_FOLDER,
     # HKCR_DRIVER,
 ]  # in which cases should the entries be displayed, "HKCR_DIR" and "HKCR_DIR_BG" covers most cases for me
-# add prefix "JB_" to entries, so they will be listed together, also for convenience to distinguish from other entries.
+# add prefix "JB_" to entries, so they will be listed together and be distinguishable from other entries.
 prefix = "JB_"
 # config end here
 
@@ -105,25 +105,11 @@ if __name__ == '__main__':
     action.add_argument('-d', '--delete', action='store_true', dest='delete', help='remove entries')
     args = parser.parse_args()
 
-    # substitute * in paths with version number
-    pattern: str = '^[0-9.]+$'
     for app in applications:
-        if ':' not in app.path:
-            app.path = os.path.join(base_path, app.path)
-        version = ''
-        for path_prefix in iter(os.listdir(app.path.split('*')[0])):
-            if re.match(pattern, path_prefix):
-                version = path_prefix
-                break
-        if not version:
-            raise Exception('Failed to match {}'.format(app.path))
-        app.path = app.path.replace('*', version)
+        app.path = os.path.join(base_path, app.path)
         print(f'"{text_wrapper.format(app.name)}" use executable file at {app.path}')
 
     if args.add:
         add()
     else:
         delete()
-
-
-
